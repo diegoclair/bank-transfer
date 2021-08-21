@@ -1,4 +1,4 @@
-## Sampa Modas System
+## Bank Transer API
   
 ### Description
-It is a system to control sales and stock of an e-commerce
+
