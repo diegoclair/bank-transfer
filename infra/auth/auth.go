@@ -17,13 +17,15 @@ const (
 )
 
 var (
-	TokenSigningMethod = jwt.SigningMethodRS256
+	TokenSigningMethod = jwt.SigningMethodHS256
 )
 
 func GenerateToken(authCfg config.AuthConfig, claims jwt.Claims) (tokenString string, err error) {
 
+	key := []byte(authCfg.PrivateKey)
+
 	token := jwt.NewWithClaims(TokenSigningMethod, claims)
-	tokenString, err = token.SignedString([]byte(authCfg.PrivateKey))
+	tokenString, err = token.SignedString(key)
 	if err != nil {
 		return tokenString, err
 	}
