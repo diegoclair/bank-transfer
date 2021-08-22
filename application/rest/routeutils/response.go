@@ -3,12 +3,12 @@ package routeutils
 import (
 	"net/http"
 
-	"github.com/diegoclair/go_utils-lib/v2/logger"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 )
 
-const ErrorMessageServiceUnavailable = "Serviço Indisponível"
+const ErrorMessageServiceUnavailable = "Service temporarily unavailable"
 
 // ResponseNoContent returns a standard API success with no content response
 func ResponseNoContent(c echo.Context) error {
@@ -41,7 +41,7 @@ func HandleAPIError(c echo.Context, errorToHandle error) (err error) {
 	errorMessage := ErrorMessageServiceUnavailable
 
 	if errorToHandle != nil {
-		logger.Error("HandleAPIError: ", errorToHandle)
+		log.Error("HandleAPIError: ", errorToHandle)
 
 		errorString := errorToHandle.Error()
 

@@ -3,13 +3,16 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+
 	"sync"
 
 	"github.com/GuiaBolso/darwin"
+	"github.com/labstack/gommon/log"
+
 	"github.com/diegoclair/bank-transfer/contract"
 	"github.com/diegoclair/bank-transfer/infra/data/migrations"
 	"github.com/diegoclair/bank-transfer/util/config"
-	"github.com/diegoclair/go_utils-lib/v2/logger"
+	"github.com/diegoclair/go_utils-lib/logger"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 )
 
@@ -19,6 +22,7 @@ var (
 	connErr error
 )
 
+// mysqlConn is the database connection manager
 type mysqlConn struct {
 	db *sql.DB
 }
@@ -32,25 +36,25 @@ func Instance() (contract.MySQLRepo, error) {
 			cfg.MySQL.Username, cfg.MySQL.Host, cfg.MySQL.Port, cfg.MySQL.DBName,
 		)
 
-		logger.Info("Connecting to database...")
+		log.Info("Connecting to database...")
 		db, connErr := sql.Open("mysql", dataSourceName)
 		if connErr != nil {
 			return
 		}
 
-		logger.Info("Database Ping...")
+		log.Info("Database Ping...")
 		connErr = db.Ping()
 		if connErr != nil {
 			return
 		}
 
-		logger.Info("Creating database...")
-		if _, connErr = db.Exec("CREATE DATABASE IF NOT EXISTS sampamodas_db;"); connErr != nil {
+		log.Info("Creating database...")
+		if _, connErr = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s;", cfg.MySQL.DBName)); connErr != nil {
 			logger.Error("Create Database error: ", connErr)
 			return
 		}
 
-		if _, connErr = db.Exec("USE sampamodas_db;"); connErr != nil {
+		if _, connErr = db.Exec(fmt.Sprintf("USE %s;", cfg.MySQL.DBName)); connErr != nil {
 			logger.Error("Default Database error: ", connErr)
 			return
 		}
@@ -63,6 +67,7 @@ func Instance() (contract.MySQLRepo, error) {
 
 		logger.Info("Running the migrations")
 		driver := darwin.NewGenericDriver(db, darwin.MySQLDialect{})
+
 		d := darwin.New(driver, migrations.Migrations, nil)
 
 		connErr = d.Migrate()
@@ -81,7 +86,7 @@ func Instance() (contract.MySQLRepo, error) {
 	return conn, connErr
 }
 
-// Begin starts a mysql transaction
+// Begin starts a transaction
 func (c *mysqlConn) Begin() (contract.MysqlTransaction, error) {
 	tx, err := c.db.Begin()
 	if err != nil {
@@ -95,6 +100,6 @@ func (c *mysqlConn) Close() (err error) {
 	return c.db.Close()
 }
 
-func (c *mysqlConn) Auth() contract.AuthRepo {
-	return newAuthRepo(c.db)
+func (c *mysqlConn) User() contract.UserRepo {
+	return newUserRepo(c.db)
 }

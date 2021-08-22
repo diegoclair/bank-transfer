@@ -39,6 +39,10 @@ func (s *Controller) handleLogin(c echo.Context) error {
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
+	err = input.Validate()
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
 
 	appContext := context.Background()
 	auth, err := s.authService.Login(appContext, input.DocumentNumber, input.Secret)

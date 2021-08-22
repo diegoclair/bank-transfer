@@ -1,8 +1,16 @@
 package entity
 
+import "github.com/dgrijalva/jwt-go"
+
 // Authentication data model
 type Authentication struct {
-	Token      string `json:"token"`
-	ValidTime  int64  `json:"valid_time"`
-	ServerTime int64  `json:"server_time"`
+	Token      string
+	ValidTime  int64
+	ServerTime int64
+}
+
+type TokenData struct {
+	jwt.StandardClaims
+	UserID   string
+	LoggedIn bool
 }

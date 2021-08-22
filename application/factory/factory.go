@@ -4,6 +4,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/IQ-tech/go-mapper"
 	"github.com/diegoclair/bank-transfer/domain/service"
 	"github.com/diegoclair/bank-transfer/infra/data"
@@ -31,13 +32,14 @@ func GetDomainServices() *Services {
 			log.Fatalf("Error to connect data repositories: %v", err)
 		}
 
-		cfg := config.GetConfigEnvironment()
-		svc := service.New(data, cfg)
-		svm := service.NewServiceManager()
-		mapper := mapper.New()
 		instance = &Services{}
+		cfg := config.GetConfigEnvironment()
+		cipher := datacrypto.NewAESECB(datacrypto.AES256, cfg.MySQL.CryptoKey)
+		svc := service.New(data, cfg, cipher)
+		svm := service.NewServiceManager()
+
 		instance.Cfg = cfg
-		instance.Mapper = mapper
+		instance.Mapper = mapper.New()
 		instance.AuthService = svm.AuthService(svc)
 	})
 

@@ -58,6 +58,6 @@ func (t *mysqlTransaction) Rollback() error {
 	return nil
 }
 
-func (t *mysqlTransaction) Auth() contract.AuthRepo {
-	return newAuthRepo(t.tx)
+func (t *mysqlTransaction) User() contract.UserRepo {
+	return newUserRepo(t.tx)
 }

@@ -7,9 +7,9 @@ import (
 	"github.com/diegoclair/bank-transfer/application/factory"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/authroute"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/pingroute"
-	"github.com/diegoclair/go_utils-lib/v2/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
 )
 
 // IRouter interface for routers
@@ -29,7 +29,7 @@ func StartRestServer() {
 		port = "5000"
 	}
 
-	logger.Info(fmt.Sprintf("About to start the application on port: %s...", port))
+	log.Info(fmt.Sprintf("About to start the application on port: %s...", port))
 
 	if err := server.Start(fmt.Sprintf(":%s", port)); err != nil {
 		panic(err)
