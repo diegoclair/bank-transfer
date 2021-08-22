@@ -43,6 +43,36 @@ func (r *userRepo) parseUser(row scanner) (retVal entity.User, err error) {
 	return retVal, nil
 }
 
+func (r *userRepo) CreateUser(user entity.User) (err error) {
+	query := `
+		INSERT INTO tab_user (
+			user_uuid,
+			name,
+			document_number,
+			password
+		) 
+		VALUES (?, ?, ?, ?);
+	`
+
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return mysqlutils.HandleMySQLError(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		user.UUID,
+		user.Name,
+		user.DocumentNumber,
+		user.Password,
+	)
+	if err != nil {
+		return mysqlutils.HandleMySQLError(err)
+	}
+
+	return nil
+}
+
 func (r *userRepo) GetUserByDocument(encryptedDocumentNumber string) (user entity.User, err error) {
 
 	query := querySelectBase + `

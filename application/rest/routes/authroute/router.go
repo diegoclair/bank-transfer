@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	loginRoute = "/login/"
+	loginRoute  = "/login/"
+	signupRoute = "/signup/"
 )
 
 type UserRouter struct {
@@ -23,4 +24,5 @@ func NewRouter(ctrl *Controller, routeName string) *UserRouter {
 func (r *UserRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
 	router := appGroup.Group(r.routeName)
 	router.POST(loginRoute, r.ctrl.handleLogin)
+	router.POST(signupRoute, r.ctrl.handleSignup)
 }

@@ -26,3 +26,21 @@ func (l *Login) Validate() error {
 
 	return nil
 }
+
+type Signup struct {
+	Name string `json:"name,omitempty" validate:"required,min=3"`
+	Login
+}
+
+func (u *Signup) Validate() error {
+	err := u.Login.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = validstruct.ValidateStruct(u)
+	if err != nil {
+		return err
+	}
+	return nil
+}

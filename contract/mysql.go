@@ -16,5 +16,6 @@ type MySQLRepo interface {
 }
 
 type UserRepo interface {
+	CreateUser(user entity.User) (err error)
 	GetUserByDocument(encryptedDocumentNumber string) (user entity.User, err error)
 }

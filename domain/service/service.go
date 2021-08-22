@@ -1,8 +1,6 @@
 package service
 
 import (
-	"context"
-
 	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/diegoclair/bank-transfer/contract"
 	"github.com/diegoclair/bank-transfer/domain/entity"
@@ -32,7 +30,8 @@ type PingService interface {
 }
 
 type AuthService interface {
-	Login(appContext context.Context, email, password string) (retVal entity.Authentication, err error)
+	CreateUser(newUser entity.User) (err error)
+	Login(email, password string) (retVal entity.Authentication, err error)
 }
 
 type serviceManager struct {

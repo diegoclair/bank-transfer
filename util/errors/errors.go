@@ -13,9 +13,9 @@ var noRecordsFindRE = regexp.MustCompile(noRecordsFind)
 const noSQLRows string = "no rows in result set"
 const noRecordsFind string = "No records find"
 
-//SQLResultIsEmpty - Check if the error is because there are no sql rows or
+//SQLNotFound - Check if the error is because there are no sql rows or
 //no records find with given parameters
-func SQLResultIsEmpty(err string) bool {
+func SQLNotFound(err string) bool {
 	noRowsIdx := noSQLRowsRE.FindStringIndex(err)
 	if len(noRowsIdx) > 0 {
 		return true

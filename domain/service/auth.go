@@ -1,16 +1,17 @@
 package service
 
 import (
-	"context"
 	"crypto/md5"
 	"encoding/hex"
+
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/diegoclair/bank-transfer/domain/entity"
 	"github.com/diegoclair/bank-transfer/infra/auth"
+	"github.com/diegoclair/bank-transfer/util/errors"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/gommon/log"
+	"github.com/twinj/uuid"
 )
 
 const (
@@ -28,7 +29,42 @@ func newAuthService(svc *Service) AuthService {
 	}
 }
 
-func (s *authService) Login(appContext context.Context, documentNumber, password string) (retVal entity.Authentication, err error) {
+func (s *authService) CreateUser(user entity.User) (err error) {
+
+	log.Info("CreateUser: Process Started")
+	defer log.Info("CreateUser: Process Finished")
+
+	user.DocumentNumber, err = s.svc.cipher.Encrypt(user.DocumentNumber)
+	if err != nil {
+		log.Error("CreateUser: ", err)
+		return err
+	}
+
+	_, err = s.svc.dm.MySQL().User().GetUserByDocument(user.DocumentNumber)
+	if err != nil && !errors.SQLNotFound(err.Error()) {
+		log.Error("CreateUser: ", err)
+		return err
+	} else if err == nil {
+		log.Error("CreateUser: The document number is already in use")
+		return resterrors.NewConflictError("The document number is already in use")
+	}
+
+	hasher := md5.New()
+	hasher.Write([]byte(user.Password))
+	user.Password = hex.EncodeToString(hasher.Sum(nil))
+
+	user.UUID = uuid.NewV4().String()
+
+	err = s.svc.dm.MySQL().User().CreateUser(user)
+	if err != nil {
+		log.Error("CreateUser: ", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *authService) Login(documentNumber, password string) (retVal entity.Authentication, err error) {
 
 	log.Info("Login: Process Started")
 	defer log.Info("Login: Process Finished")
@@ -39,12 +75,12 @@ func (s *authService) Login(appContext context.Context, documentNumber, password
 		return retVal, err
 	}
 
-	log.Info("testeeeee", s.svc.dm)
 	user, err := s.svc.dm.MySQL().User().GetUserByDocument(encryptedDocumentNumber)
 	if err != nil {
-		log.Error("Login: Invalid document number received: ", err)
+		log.Error("Login: ", err)
 		return retVal, resterrors.NewUnauthorizedError(wrongLogin)
 	}
+
 	log.Info("Login: user_id: ", user.ID)
 	log.Info("Login: user_uuid: ", user.UUID)
 	log.Info("Login: user_name: ", user.Name)
@@ -54,6 +90,7 @@ func (s *authService) Login(appContext context.Context, documentNumber, password
 	pass := hex.EncodeToString(hasher.Sum(nil))
 
 	if pass != user.Password {
+		log.Error("Login: wrong password")
 		return retVal, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
@@ -65,11 +102,11 @@ func (s *authService) Login(appContext context.Context, documentNumber, password
 	claims.LoggedIn = true
 	claims.IssuedAt = issuedAt.Unix()
 	claims.ExpiresAt = expiresAt.Unix()
+	claims.Issuer = "ST-BANK-TRANSFER"
 
 	newToken, err := auth.GenerateToken(s.svc.cfg.App.Auth, claims)
-
 	if err != nil {
-		log.Error("Login: ", err)
+		log.Error("Login: error to generate token: ", err)
 		return retVal, err
 	}
 
@@ -78,21 +115,4 @@ func (s *authService) Login(appContext context.Context, documentNumber, password
 	retVal.ValidTime = expiresAt.Unix()
 
 	return retVal, nil
-}
-
-func (s *authService) GetDataToken(context context.Context) (retVal *entity.TokenData, err error) {
-
-	token := context.Value(auth.ContextTokenKey)
-
-	jwtToken, ok := token.(*jwt.Token)
-	if !ok {
-		return retVal, resterrors.NewUnauthorizedError("Invalid data claims")
-	}
-
-	claims, ok := jwtToken.Claims.(*entity.TokenData)
-	if !ok {
-		return retVal, resterrors.NewUnauthorizedError("Invalid data claims")
-	}
-
-	return claims, nil
 }
