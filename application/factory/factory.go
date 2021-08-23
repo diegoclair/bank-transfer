@@ -12,10 +12,11 @@ import (
 )
 
 type Services struct {
-	Cfg            *config.EnvironmentVariables
-	Mapper         mapper.Mapper
-	AccountService service.AccountService
-	AuthService    service.AuthService
+	Cfg             *config.EnvironmentVariables
+	Mapper          mapper.Mapper
+	AccountService  service.AccountService
+	AuthService     service.AuthService
+	TransferService service.TransferService
 }
 
 var (
@@ -43,6 +44,7 @@ func GetDomainServices() *Services {
 		instance.Mapper = mapper.New()
 		instance.AccountService = svm.AccountService(svc)
 		instance.AuthService = svm.AuthService(svc)
+		instance.TransferService = svm.TransferService(svc)
 	})
 
 	return instance

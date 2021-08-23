@@ -8,19 +8,19 @@ const (
 	loginRoute = "/login"
 )
 
-type UserRouter struct {
+type AccountRouter struct {
 	ctrl      *Controller
 	routeName string
 }
 
-func NewRouter(ctrl *Controller, routeName string) *UserRouter {
-	return &UserRouter{
+func NewRouter(ctrl *Controller, routeName string) *AccountRouter {
+	return &AccountRouter{
 		ctrl:      ctrl,
 		routeName: routeName,
 	}
 }
 
-func (r *UserRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
+func (r *AccountRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
 	router := appGroup.Group(r.routeName)
 	router.POST(loginRoute, r.ctrl.handleLogin)
 }

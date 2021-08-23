@@ -1,0 +1,75 @@
+package transferroute
+
+import (
+	"sync"
+
+	"github.com/IQ-tech/go-mapper"
+	"github.com/diegoclair/bank-transfer/application/rest/routeutils"
+	"github.com/diegoclair/bank-transfer/application/rest/viewmodel"
+	"github.com/diegoclair/bank-transfer/domain/entity"
+	"github.com/diegoclair/bank-transfer/domain/service"
+
+	"github.com/labstack/echo/v4"
+)
+
+var (
+	instance *Controller
+	once     sync.Once
+)
+
+type Controller struct {
+	transferService service.TransferService
+	mapper          mapper.Mapper
+}
+
+func NewController(transferService service.TransferService, mapper mapper.Mapper) *Controller {
+	once.Do(func() {
+		instance = &Controller{
+			transferService: transferService,
+			mapper:          mapper,
+		}
+	})
+	return instance
+}
+
+func (s *Controller) handleAddTransfer(c echo.Context) error {
+
+	input := viewmodel.Transfer{}
+	err := c.Bind(&input)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	err = input.Validate()
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	transfer := entity.Transfer{}
+	err = s.mapper.From(input).To(transfer)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	err = s.transferService.CreateTransfer(transfer)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+	return routeutils.ResponseCreated(c)
+}
+
+func (s *Controller) handleGetTransfers(c echo.Context) error {
+
+	transfers, err := s.transferService.GetTransfers()
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	response := []viewmodel.Transfer{}
+	err = s.mapper.From(transfers).To(&response)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	return routeutils.ResponseAPIOK(c, response)
+}

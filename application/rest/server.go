@@ -8,6 +8,7 @@ import (
 	"github.com/diegoclair/bank-transfer/application/rest/routes/accountroute"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/authroute"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/pingroute"
+	"github.com/diegoclair/bank-transfer/application/rest/routes/transferroute"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -47,15 +48,18 @@ func initServer() *echo.Echo {
 	pingController := pingroute.NewController()
 	accountController := accountroute.NewController(factory.AccountService, factory.Mapper)
 	authController := authroute.NewController(factory.AuthService, factory.Mapper)
+	transferController := transferroute.NewController(factory.TransferService, factory.Mapper)
 
 	pingRoute := pingroute.NewRouter(pingController, "ping")
 	accountRoute := accountroute.NewRouter(accountController, "accounts")
 	authRoute := authroute.NewRouter(authController, "auth")
+	transferRoute := transferroute.NewRouter(transferController, "transfers")
 
 	appRouter := &Router{}
 	appRouter.addRouters(accountRoute)
 	appRouter.addRouters(authRoute)
 	appRouter.addRouters(pingRoute)
+	appRouter.addRouters(transferRoute)
 
 	return appRouter.registerAppRouters(srv)
 }
