@@ -3,7 +3,6 @@ package service
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 
 	"github.com/diegoclair/bank-transfer/domain/entity"
 	"github.com/diegoclair/bank-transfer/util/errors"
@@ -32,7 +31,7 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 		log.Error("CreateAccount: ", err)
 		return err
 	}
-	fmt.Println(s.svc.dm.MySQL())
+
 	_, err = s.svc.dm.MySQL().Account().GetAccountByDocument(account.CPF)
 	if err != nil && !errors.SQLNotFound(err.Error()) {
 		log.Error("CreateAccount: ", err)

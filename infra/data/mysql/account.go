@@ -44,6 +44,33 @@ func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err err
 
 	return account, nil
 }
+func (r *accountRepo) AddTransfer(transfer entity.Transfer) (err error) {
+	query := `
+		INSERT INTO tab_transfer (
+			account_origin_id,
+			account_destination_id,
+			amount
+		) 
+		VALUES (?, ?, ?);
+	`
+
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return mysqlutils.HandleMySQLError(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(
+		transfer.AccountOriginID,
+		transfer.AccountDestinationID,
+		transfer.Amount,
+	)
+	if err != nil {
+		return mysqlutils.HandleMySQLError(err)
+	}
+
+	return nil
+}
 
 func (r *accountRepo) CreateAccount(account entity.Account) (err error) {
 	query := `
@@ -190,4 +217,27 @@ func (r *accountRepo) GetTransfersByAccountID(accountID int64) (transfers []enti
 	}
 
 	return transfers, nil
+}
+
+func (r *accountRepo) UpdateAccountBalance(account entity.Account) (err error) {
+
+	query := `
+		UPDATE 	tab_account
+		
+		SET 	balance 	= ?
+
+		WHERE  	account_id 	= ?
+	`
+
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return mysqlutils.HandleMySQLError(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(account.Balance, account.ID)
+	if err != nil {
+		return mysqlutils.HandleMySQLError(err)
+	}
+	return nil
 }

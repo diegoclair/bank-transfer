@@ -5,6 +5,7 @@ import (
 
 	"github.com/diegoclair/bank-transfer/domain/entity"
 	"github.com/diegoclair/bank-transfer/infra/auth"
+	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/gommon/log"
 )
 
@@ -23,6 +24,59 @@ func (s *transferService) CreateTransfer(appContext context.Context, transfer en
 	log.Info("CreateTransfer: Process Started")
 	defer log.Info("CreateTransfer: Process Finished")
 
+	loggedAccountUUID := appContext.Value(auth.AccountUUIDKey)
+	account, err := s.svc.dm.MySQL().Account().GetAccountByUUID(loggedAccountUUID.(string))
+	if err != nil {
+		log.Error("CreateTransfer: ", err)
+		return err
+	}
+
+	if account.Balance < transfer.Amount {
+		return resterrors.NewConflictError("Your account don't have sufficient funds to do this operation")
+	}
+
+	destAccount, err := s.svc.dm.MySQL().Account().GetAccountByUUID(transfer.AccountDestinationUUID)
+	if err != nil {
+		log.Error("CreateTransfer: ", err)
+		return err
+	}
+
+	transfer.AccountDestinationID = destAccount.ID
+	transfer.AccountOriginID = account.ID
+
+	tx, err := s.svc.dm.MySQL().Begin()
+	if err != nil {
+		log.Error("CreateTransfer: error to get db transaction", err)
+		return err
+	}
+	defer tx.Rollback()
+
+	err = tx.Account().AddTransfer(transfer)
+	if err != nil {
+		log.Error("CreateTransfer: ", err)
+		return err
+	}
+
+	account.Balance -= transfer.Amount
+	err = tx.Account().UpdateAccountBalance(account)
+	if err != nil {
+		log.Error("CreateTransfer: ", err)
+		return err
+	}
+
+	destAccount.Balance += transfer.Amount
+	err = tx.Account().UpdateAccountBalance(destAccount)
+	if err != nil {
+		log.Error("CreateTransfer: ", err)
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Error("CreateTransfer: ", err)
+		return err
+	}
+
 	return nil
 }
 
@@ -30,6 +84,7 @@ func (s *transferService) GetTransfers(appContext context.Context) (transfers []
 
 	log.Info("GetTransfers: Process Started")
 	defer log.Info("GetTransfers: Process Finished")
+
 	loggedAccountUUID := appContext.Value(auth.AccountUUIDKey)
 
 	account, err := s.svc.dm.MySQL().Account().GetAccountByUUID(loggedAccountUUID.(string))

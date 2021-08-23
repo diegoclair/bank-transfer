@@ -35,9 +35,9 @@ var (
 					transfer_id INT NOT NULL AUTO_INCREMENT,
 					account_origin_id INT NOT NULL,
 					account_destination_id INT NOT NULL,
+					amount DECIMAL(7,2) NOT NULL,
 					created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 					update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-					amount DECIMAL(7,2) NOT NULL,
 				
 				PRIMARY KEY (transfer_id),
 				UNIQUE INDEX transfer_id_UNIQUE (transfer_id ASC) VISIBLE,

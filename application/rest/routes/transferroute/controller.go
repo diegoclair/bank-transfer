@@ -46,7 +46,7 @@ func (s *Controller) handleAddTransfer(c echo.Context) error {
 	}
 
 	transfer := entity.Transfer{}
-	err = s.mapper.From(input).To(transfer)
+	err = s.mapper.From(input).To(&transfer)
 	if err != nil {
 		return routeutils.HandleAPIError(c, err)
 	}
