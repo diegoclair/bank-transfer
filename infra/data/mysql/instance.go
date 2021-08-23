@@ -100,6 +100,6 @@ func (c *mysqlConn) Close() (err error) {
 	return c.db.Close()
 }
 
-func (c *mysqlConn) User() contract.UserRepo {
-	return newUserRepo(c.db)
+func (c *mysqlConn) Account() contract.AccountRepo {
+	return newAccountRepo(c.db)
 }

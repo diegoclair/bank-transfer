@@ -23,15 +23,19 @@ func New(dm contract.DataManager, cfg *config.EnvironmentVariables, cipher datac
 }
 
 type Manager interface {
+	AccountService(svc *Service) AccountService
 	AuthService(svc *Service) AuthService
 }
 
 type PingService interface {
 }
 
+type AccountService interface {
+	CreateAccount(account entity.Account) (err error)
+}
+
 type AuthService interface {
-	CreateUser(newUser entity.User) (err error)
-	Login(email, password string) (retVal entity.Authentication, err error)
+	Login(cpf, secret string) (retVal entity.Authentication, err error)
 }
 
 type serviceManager struct {
@@ -39,6 +43,10 @@ type serviceManager struct {
 
 func NewServiceManager() Manager {
 	return &serviceManager{}
+}
+
+func (s *serviceManager) AccountService(svc *Service) AccountService {
+	return newAccountService(svc)
 }
 
 func (s *serviceManager) AuthService(svc *Service) AuthService {

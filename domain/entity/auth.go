@@ -11,6 +11,6 @@ type Authentication struct {
 
 type TokenData struct {
 	jwt.StandardClaims
-	UserID   string
-	LoggedIn bool
+	AccountUUID string
+	LoggedIn    bool
 }

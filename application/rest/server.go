@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/diegoclair/bank-transfer/application/factory"
+	"github.com/diegoclair/bank-transfer/application/rest/routes/accountroute"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/authroute"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/pingroute"
 	"github.com/labstack/echo/v4"
@@ -44,12 +45,15 @@ func initServer() *echo.Echo {
 	srv.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	pingController := pingroute.NewController()
+	accountController := accountroute.NewController(factory.AccountService, factory.Mapper)
 	authController := authroute.NewController(factory.AuthService, factory.Mapper)
 
 	pingRoute := pingroute.NewRouter(pingController, "ping")
+	accountRoute := accountroute.NewRouter(accountController, "accounts")
 	authRoute := authroute.NewRouter(authController, "auth")
 
 	appRouter := &Router{}
+	appRouter.addRouters(accountRoute)
 	appRouter.addRouters(authRoute)
 	appRouter.addRouters(pingRoute)
 

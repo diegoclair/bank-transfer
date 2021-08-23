@@ -8,10 +8,8 @@ import (
 
 	"github.com/diegoclair/bank-transfer/domain/entity"
 	"github.com/diegoclair/bank-transfer/infra/auth"
-	"github.com/diegoclair/bank-transfer/util/errors"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/gommon/log"
-	"github.com/twinj/uuid"
 )
 
 const (
@@ -29,67 +27,32 @@ func newAuthService(svc *Service) AuthService {
 	}
 }
 
-func (s *authService) CreateUser(user entity.User) (err error) {
-
-	log.Info("CreateUser: Process Started")
-	defer log.Info("CreateUser: Process Finished")
-
-	user.DocumentNumber, err = s.svc.cipher.Encrypt(user.DocumentNumber)
-	if err != nil {
-		log.Error("CreateUser: ", err)
-		return err
-	}
-
-	_, err = s.svc.dm.MySQL().User().GetUserByDocument(user.DocumentNumber)
-	if err != nil && !errors.SQLNotFound(err.Error()) {
-		log.Error("CreateUser: ", err)
-		return err
-	} else if err == nil {
-		log.Error("CreateUser: The document number is already in use")
-		return resterrors.NewConflictError("The document number is already in use")
-	}
-
-	hasher := md5.New()
-	hasher.Write([]byte(user.Password))
-	user.Password = hex.EncodeToString(hasher.Sum(nil))
-
-	user.UUID = uuid.NewV4().String()
-
-	err = s.svc.dm.MySQL().User().CreateUser(user)
-	if err != nil {
-		log.Error("CreateUser: ", err)
-		return err
-	}
-
-	return nil
-}
-
-func (s *authService) Login(documentNumber, password string) (retVal entity.Authentication, err error) {
+func (s *authService) Login(cpf, secret string) (retVal entity.Authentication, err error) {
 
 	log.Info("Login: Process Started")
 	defer log.Info("Login: Process Finished")
 
-	encryptedDocumentNumber, err := s.svc.cipher.Encrypt(documentNumber)
+	encryptedDocumentNumber, err := s.svc.cipher.Encrypt(cpf)
 	if err != nil {
 		log.Error("Login: ", err)
 		return retVal, err
 	}
 
-	user, err := s.svc.dm.MySQL().User().GetUserByDocument(encryptedDocumentNumber)
+	account, err := s.svc.dm.MySQL().Account().GetAccountByDocument(encryptedDocumentNumber)
 	if err != nil {
 		log.Error("Login: ", err)
 		return retVal, resterrors.NewUnauthorizedError(wrongLogin)
 	}
 
-	log.Info("Login: user_id: ", user.ID)
-	log.Info("Login: user_uuid: ", user.UUID)
-	log.Info("Login: user_name: ", user.Name)
+	log.Info("Login: account_id: ", account.ID)
+	log.Info("Login: account_uuid: ", account.UUID)
+	log.Info("Login: name: ", account.Name)
 
 	hasher := md5.New()
-	hasher.Write([]byte(password))
+	hasher.Write([]byte(secret))
 	pass := hex.EncodeToString(hasher.Sum(nil))
 
-	if pass != user.Password {
+	if pass != account.Secret {
 		log.Error("Login: wrong password")
 		return retVal, resterrors.NewUnauthorizedError(wrongLogin)
 	}
@@ -98,7 +61,7 @@ func (s *authService) Login(documentNumber, password string) (retVal entity.Auth
 	expiresAt := issuedAt.Add(tokenExpirationTime)
 
 	claims := &entity.TokenData{}
-	claims.UserID = user.UUID
+	claims.AccountUUID = account.UUID
 	claims.LoggedIn = true
 	claims.IssuedAt = issuedAt.Unix()
 	claims.ExpiresAt = expiresAt.Unix()

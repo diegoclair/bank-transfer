@@ -12,10 +12,11 @@ type MysqlTransaction interface {
 //MySQLRepo defines the repository aggregator interface
 type MySQLRepo interface {
 	Begin() (MysqlTransaction, error)
-	User() UserRepo
+	Account() AccountRepo
 }
 
-type UserRepo interface {
-	CreateUser(user entity.User) (err error)
-	GetUserByDocument(encryptedDocumentNumber string) (user entity.User, err error)
+type AccountRepo interface {
+	CreateAccount(account entity.Account) (err error)
+	GetAccountByDocument(encryptedCPF string) (account entity.Account, err error)
+	GetAccounts() (accounts []entity.Account, err error)
 }

@@ -7,40 +7,22 @@ import (
 )
 
 type Login struct {
-	DocumentNumber string `json:"document_number,omitempty" validate:"required,min=11,max=11"`
-	Secret         string `json:"secret,omitempty" validate:"required,min=8"`
+	CPF    string `json:"cpf,omitempty" validate:"required,min=11,max=11"`
+	Secret string `json:"secret,omitempty" validate:"required,min=8"`
 }
 
 func (l *Login) Validate() error {
 
-	l.DocumentNumber = validator.CleanNumber(l.DocumentNumber)
+	l.CPF = validator.CleanNumber(l.CPF)
 	err := validstruct.ValidateStruct(l)
 	if err != nil {
 		return err
 	}
 
-	validDocument := validator.IsValidCPF(l.DocumentNumber)
+	validDocument := validator.IsValidCPF(l.CPF)
 	if !validDocument {
 		return resterrors.NewUnprocessableEntity("Invalid cpf document")
 	}
 
-	return nil
-}
-
-type Signup struct {
-	Name string `json:"name,omitempty" validate:"required,min=3"`
-	Login
-}
-
-func (u *Signup) Validate() error {
-	err := u.Login.Validate()
-	if err != nil {
-		return err
-	}
-
-	err = validstruct.ValidateStruct(u)
-	if err != nil {
-		return err
-	}
 	return nil
 }

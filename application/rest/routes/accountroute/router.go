@@ -1,11 +1,11 @@
-package authroute
+package accountroute
 
 import (
 	"github.com/labstack/echo/v4"
 )
 
 const (
-	loginRoute = "/login/"
+	rootRoute = "/"
 )
 
 type UserRouter struct {
@@ -22,5 +22,5 @@ func NewRouter(ctrl *Controller, routeName string) *UserRouter {
 
 func (r *UserRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
 	router := appGroup.Group(r.routeName)
-	router.POST(loginRoute, r.ctrl.handleLogin)
+	router.POST(rootRoute, r.ctrl.handleAddAccount)
 }
