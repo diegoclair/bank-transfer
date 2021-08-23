@@ -57,3 +57,19 @@ func (s *Controller) handleAddAccount(c echo.Context) error {
 	}
 	return routeutils.ResponseCreated(c)
 }
+
+func (s *Controller) handleGetAccounts(c echo.Context) error {
+
+	accounts, err := s.accountService.GetAccounts()
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	response := []viewmodel.Account{}
+	err = s.mapper.From(accounts).To(&response)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	return routeutils.ResponseAPIOK(c, response)
+}

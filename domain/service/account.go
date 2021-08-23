@@ -56,3 +56,25 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 
 	return nil
 }
+
+func (s *accountService) GetAccounts() (accounts []entity.Account, err error) {
+
+	log.Info("GetAccounts: Process Started")
+	defer log.Info("GetAccounts: Process Finished")
+
+	accounts, err = s.svc.dm.MySQL().Account().GetAccounts()
+	if err != nil {
+		log.Error("GetAccounts: ", err)
+		return accounts, err
+	}
+
+	for i := 0; i < len(accounts); i++ {
+		_, err = s.svc.cipher.DecryptStruct(&accounts[i])
+		if err != nil {
+			log.Error("GetAccounts: error to decrypt account struct: ", err)
+			return accounts, err
+		}
+	}
+
+	return accounts, nil
+}

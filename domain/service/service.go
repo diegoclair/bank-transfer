@@ -32,6 +32,7 @@ type PingService interface {
 
 type AccountService interface {
 	CreateAccount(account entity.Account) (err error)
+	GetAccounts() (accounts []entity.Account, err error)
 }
 
 type AuthService interface {

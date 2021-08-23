@@ -23,4 +23,5 @@ func NewRouter(ctrl *Controller, routeName string) *UserRouter {
 func (r *UserRouter) RegisterRoutes(appGroup, privateGroup *echo.Group) {
 	router := appGroup.Group(r.routeName)
 	router.POST(rootRoute, r.ctrl.handleAddAccount)
+	router.GET(rootRoute, r.ctrl.handleGetAccounts)
 }

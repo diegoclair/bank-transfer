@@ -19,3 +19,10 @@ func (u *AddAccount) Validate() error {
 	}
 	return nil
 }
+
+type Account struct {
+	UUID    string  `json:"id,omitempty"`
+	Name    string  `json:"name,omitempty"`
+	CPF     string  `json:"cpf,omitempty"`
+	Balance float64 `json:"balance,omitempty"`
+}
