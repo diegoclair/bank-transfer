@@ -9,11 +9,11 @@ import (
 
 type Service struct {
 	dm     contract.DataManager
-	cfg    *config.EnvironmentVariables
+	cfg    *config.Config
 	cipher datacrypto.Crypto
 }
 
-func New(dm contract.DataManager, cfg *config.EnvironmentVariables, cipher datacrypto.Crypto) *Service {
+func New(dm contract.DataManager, cfg *config.Config, cipher datacrypto.Crypto) *Service {
 	svc := new(Service)
 	svc.dm = dm
 	svc.cfg = cfg

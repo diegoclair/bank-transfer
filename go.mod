@@ -14,6 +14,7 @@ require (
 	github.com/diegoclair/go_utils-lib/v2 v2.4.3
 	github.com/fsnotify/fsnotify v1.5.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.5.0
 	github.com/labstack/gommon v0.3.0
 	github.com/mattn/go-isatty v0.0.13 // indirect

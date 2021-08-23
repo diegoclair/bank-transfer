@@ -8,12 +8,12 @@ import (
 )
 
 var (
-	config *EnvironmentVariables
+	config *Config
 	once   sync.Once
 )
 
 // GetConfigEnvironment to read initial config
-func GetConfigEnvironment() *EnvironmentVariables {
+func GetConfigEnvironment() *Config {
 	once.Do(func() {
 
 		viper.SetConfigFile(".env")
@@ -25,7 +25,7 @@ func GetConfigEnvironment() *EnvironmentVariables {
 			panic(err)
 		}
 
-		config = &EnvironmentVariables{}
+		config = &Config{}
 
 		config.App.Auth.PrivateKey = viper.GetString("JWT_PRIVATE_KEY")
 
@@ -44,8 +44,7 @@ func GetConfigEnvironment() *EnvironmentVariables {
 	return config
 }
 
-// EnvironmentVariables is environment variables configs
-type EnvironmentVariables struct {
+type Config struct {
 	App   AppConfig
 	MySQL MysqlConfig
 }

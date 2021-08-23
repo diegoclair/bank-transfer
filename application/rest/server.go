@@ -8,7 +8,9 @@ import (
 	"github.com/diegoclair/bank-transfer/application/rest/routes/accountroute"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/authroute"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/pingroute"
+	servermiddleware "github.com/diegoclair/bank-transfer/application/rest/routes/serverMiddleware"
 	"github.com/diegoclair/bank-transfer/application/rest/routes/transferroute"
+	"github.com/diegoclair/bank-transfer/util/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -61,17 +63,19 @@ func initServer() *echo.Echo {
 	appRouter.addRouters(pingRoute)
 	appRouter.addRouters(transferRoute)
 
-	return appRouter.registerAppRouters(srv)
+	return appRouter.registerAppRouters(srv, factory.Cfg)
 }
 
 func (r *Router) addRouters(router IRouter) {
 	r.routers = append(r.routers, router)
 }
 
-func (r *Router) registerAppRouters(srv *echo.Echo) *echo.Echo {
+func (r *Router) registerAppRouters(srv *echo.Echo, cfg *config.Config) *echo.Echo {
 
 	appGroup := srv.Group("/")
-	privateGroup := appGroup.Group("")
+	privateGroup := appGroup.Group("",
+		servermiddleware.JWTMiddlewareWithConfig(servermiddleware.JWTConfig{PrivateKey: cfg.App.Auth.PrivateKey}),
+		servermiddleware.JWTMiddlewarePrivateRoute())
 
 	for _, appRouter := range r.routers {
 		appRouter.RegisterRoutes(appGroup, privateGroup)

@@ -12,7 +12,7 @@ import (
 )
 
 type Services struct {
-	Cfg             *config.EnvironmentVariables
+	Cfg             *config.Config
 	Mapper          mapper.Mapper
 	AccountService  service.AccountService
 	AuthService     service.AuthService
