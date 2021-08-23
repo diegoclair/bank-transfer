@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	loginRoute = "/login/"
+	loginRoute = "/login"
 )
 
 type UserRouter struct {

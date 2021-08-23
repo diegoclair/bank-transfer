@@ -73,3 +73,43 @@ func (s *Controller) handleGetAccounts(c echo.Context) error {
 
 	return routeutils.ResponseAPIOK(c, response)
 }
+
+func (s *Controller) handleGetAccountByID(c echo.Context) error {
+
+	accountUUID, err := routeutils.GetAndValidateParam(c, "account_id", "Invalid account_id")
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	account, err := s.accountService.GetAccountByUUID(accountUUID)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	response := viewmodel.Account{}
+	err = s.mapper.From(account).To(&response)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	return routeutils.ResponseAPIOK(c, response)
+}
+
+func (s *Controller) handleGetAccountBalanceByID(c echo.Context) error {
+
+	accountUUID, err := routeutils.GetAndValidateParam(c, "account_id", "Invalid account_id")
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	account, err := s.accountService.GetAccountByUUID(accountUUID)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	response := viewmodel.Account{
+		Balance: account.Balance,
+	}
+
+	return routeutils.ResponseAPIOK(c, response)
+}

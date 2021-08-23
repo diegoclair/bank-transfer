@@ -123,3 +123,28 @@ func (r *accountRepo) GetAccounts() (accounts []entity.Account, err error) {
 	}
 	return accounts, nil
 }
+
+func (r *accountRepo) GetAccountByUUID(accountUUID string) (account entity.Account, err error) {
+
+	query := querySelectBase + `
+		WHERE ta.account_uuid = ?
+	`
+
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return account, mysqlutils.HandleMySQLError(err)
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(accountUUID)
+	if err != nil {
+		return account, mysqlutils.HandleMySQLError(err)
+	}
+
+	account, err = r.parseAccount(row)
+	if err != nil {
+		return account, mysqlutils.HandleMySQLError(err)
+	}
+
+	return account, nil
+}

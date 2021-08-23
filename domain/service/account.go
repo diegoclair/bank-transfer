@@ -78,3 +78,22 @@ func (s *accountService) GetAccounts() (accounts []entity.Account, err error) {
 
 	return accounts, nil
 }
+
+func (s *accountService) GetAccountByUUID(accountUUID string) (account entity.Account, err error) {
+	log.Info("GetAccountByUUID: Process Started")
+	defer log.Info("GetAccountByUUID: Process Finished")
+
+	account, err = s.svc.dm.MySQL().Account().GetAccountByUUID(accountUUID)
+	if err != nil {
+		log.Error("GetAccountByUUID: ", err)
+		return account, err
+	}
+
+	_, err = s.svc.cipher.DecryptStruct(&account)
+	if err != nil {
+		log.Error("GetAccountByUUID: error to decrypt account struct: ", err)
+		return account, err
+	}
+
+	return account, nil
+}
