@@ -27,22 +27,22 @@ const querySelectBase string = `
 		FROM tab_account 				ta
 		`
 
-func (r *accountRepo) parseAccount(row scanner) (retVal entity.Account, err error) {
+func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err error) {
 
 	err = row.Scan(
-		&retVal.ID,
-		&retVal.UUID,
-		&retVal.Name,
-		&retVal.CPF,
-		&retVal.Balance,
-		&retVal.Secret,
+		&account.ID,
+		&account.UUID,
+		&account.Name,
+		&account.CPF,
+		&account.Balance,
+		&account.Secret,
 	)
 
 	if err != nil {
-		return retVal, err
+		return account, err
 	}
 
-	return retVal, nil
+	return account, nil
 }
 
 func (r *accountRepo) CreateAccount(account entity.Account) (err error) {
@@ -147,4 +147,47 @@ func (r *accountRepo) GetAccountByUUID(accountUUID string) (account entity.Accou
 	}
 
 	return account, nil
+}
+
+func (r *accountRepo) GetTransfersByAccountID(accountID int64) (transfers []entity.Transfer, err error) {
+	query := ` 
+		SELECT 
+			tt.transfer_id,
+			tt.account_origin_id,
+			tt.account_destination_id,
+			tt.amount,
+			tt.created_at
+		
+		FROM 	tab_transfer 			tt
+		WHERE	tt.account_origin_id 	= 	?
+	`
+
+	stmt, err := r.db.Prepare(query)
+	if err != nil {
+		return transfers, mysqlutils.HandleMySQLError(err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(accountID)
+	if err != nil {
+		return transfers, mysqlutils.HandleMySQLError(err)
+	}
+
+	for rows.Next() {
+		transfer := entity.Transfer{}
+		err = rows.Scan(
+			&transfer.ID,
+			&transfer.AccountOriginID,
+			&transfer.AccountDestinationID,
+			&transfer.Amount,
+			&transfer.CreateAt,
+		)
+		if err != nil {
+			return transfers, err
+		}
+
+		transfers = append(transfers, transfer)
+	}
+
+	return transfers, nil
 }

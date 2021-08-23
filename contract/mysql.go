@@ -20,4 +20,5 @@ type AccountRepo interface {
 	GetAccountByDocument(encryptedCPF string) (account entity.Account, err error)
 	GetAccounts() (accounts []entity.Account, err error)
 	GetAccountByUUID(accountUUID string) (account entity.Account, err error)
+	GetTransfersByAccountID(accountID int64) (transfers []entity.Transfer, err error)
 }

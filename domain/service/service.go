@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+
 	"github.com/IQ-tech/go-crypto-layer/datacrypto"
 	"github.com/diegoclair/bank-transfer/contract"
 	"github.com/diegoclair/bank-transfer/domain/entity"
@@ -42,8 +44,8 @@ type AuthService interface {
 }
 
 type TransferService interface {
-	CreateTransfer(transfer entity.Transfer) (err error)
-	GetTransfers() (transfers []entity.Transfer, err error)
+	CreateTransfer(appContext context.Context, transfer entity.Transfer) (err error)
+	GetTransfers(appContext context.Context) (transfers []entity.Transfer, err error)
 }
 
 type serviceManager struct {

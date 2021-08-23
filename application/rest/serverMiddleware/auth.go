@@ -49,7 +49,7 @@ func JWTMiddlewarePrivateRoute() echo.MiddlewareFunc {
 			}
 
 			// Add account information to context
-			ctx.Set(auth.AccountIDKey.String(), claims.AccountUUID)
+			ctx.Set(auth.AccountUUIDKey.String(), claims.AccountUUID)
 
 			return next(ctx)
 		}

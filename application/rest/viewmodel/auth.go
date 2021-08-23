@@ -26,3 +26,9 @@ func (l *Login) Validate() error {
 
 	return nil
 }
+
+type AuthResponse struct {
+	Token      string `json:"token"`
+	ValidTime  int64  `json:"valid_time"`
+	ServerTime int64  `json:"server_time"`
+}

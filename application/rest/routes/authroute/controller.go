@@ -48,5 +48,11 @@ func (s *Controller) handleLogin(c echo.Context) error {
 		return routeutils.HandleAPIError(c, err)
 	}
 
-	return routeutils.ResponseAPIOK(c, auth)
+	response := viewmodel.AuthResponse{}
+	err = s.mapper.From(auth).To(&response)
+	if err != nil {
+		return routeutils.HandleAPIError(c, err)
+	}
+
+	return routeutils.ResponseAPIOK(c, response)
 }

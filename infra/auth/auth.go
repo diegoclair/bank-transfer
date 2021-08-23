@@ -12,7 +12,7 @@ func (k Key) String() string {
 }
 
 const (
-	AccountIDKey    Key = "AccountID"
+	AccountUUIDKey  Key = "AccountUUID"
 	ContextTokenKey Key = "user-token"
 	TokenHeaderName Key = "Token"
 )
