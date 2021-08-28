@@ -140,8 +140,8 @@ func (r *accountRepo) GetAccounts() (accounts []entity.Account, err error) {
 	if err != nil {
 		return accounts, mysqlutils.HandleMySQLError(err)
 	}
+	account := entity.Account{}
 	for rows.Next() {
-		account := entity.Account{}
 		account, err = r.parseAccount(rows)
 		if err != nil {
 			return accounts, mysqlutils.HandleMySQLError(err)
@@ -200,8 +200,8 @@ func (r *accountRepo) GetTransfersByAccountID(accountID int64) (transfers []enti
 		return transfers, mysqlutils.HandleMySQLError(err)
 	}
 
+	transfer := entity.Transfer{}
 	for rows.Next() {
-		transfer := entity.Transfer{}
 		err = rows.Scan(
 			&transfer.ID,
 			&transfer.AccountOriginID,
