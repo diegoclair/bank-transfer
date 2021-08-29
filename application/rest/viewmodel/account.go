@@ -1,6 +1,10 @@
 package viewmodel
 
-import "github.com/diegoclair/go_utils-lib/v2/validstruct"
+import (
+	"time"
+
+	"github.com/diegoclair/go_utils-lib/v2/validstruct"
+)
 
 type AddAccount struct {
 	Name string `json:"name,omitempty" validate:"required,min=3"`
@@ -21,8 +25,9 @@ func (u *AddAccount) Validate() error {
 }
 
 type Account struct {
-	UUID    string  `json:"id,omitempty"`
-	Name    string  `json:"name,omitempty"`
-	CPF     string  `json:"cpf,omitempty"`
-	Balance float64 `json:"balance"`
+	UUID      string    `json:"id,omitempty"`
+	Name      string    `json:"name,omitempty"`
+	CPF       string    `json:"cpf,omitempty"`
+	Balance   float64   `json:"balance"`
+	CreatedAT time.Time `json:"create_at,omitempty"`
 }
