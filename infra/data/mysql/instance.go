@@ -32,7 +32,7 @@ func Instance() (contract.MySQLRepo, error) {
 	onceDB.Do(func() {
 		cfg := config.GetConfigEnvironment()
 
-		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/%s?charset=utf8",
+		dataSourceName := fmt.Sprintf("%s:root@tcp(%s:%s)/%s?charset=utf8&parseTime=true",
 			cfg.MySQL.Username, cfg.MySQL.Host, cfg.MySQL.Port, cfg.MySQL.DBName,
 		)
 
