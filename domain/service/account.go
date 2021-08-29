@@ -41,10 +41,7 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 		return resterrors.NewConflictError("The cpf is already in use")
 	}
 
-	hasher := md5.New()
-	hasher.Write([]byte(account.Secret))
-	account.Secret = hex.EncodeToString(hasher.Sum(nil))
-
+	account.Secret = s.getHashedPassword(account.Secret)
 	account.UUID = uuid.NewV4().String()
 
 	err = s.svc.dm.MySQL().Account().CreateAccount(account)
@@ -54,6 +51,12 @@ func (s *accountService) CreateAccount(account entity.Account) (err error) {
 	}
 
 	return nil
+}
+
+func (s *accountService) getHashedPassword(password string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(password))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 func (s *accountService) GetAccounts() (accounts []entity.Account, err error) {
@@ -79,6 +82,7 @@ func (s *accountService) GetAccounts() (accounts []entity.Account, err error) {
 }
 
 func (s *accountService) GetAccountByUUID(accountUUID string) (account entity.Account, err error) {
+
 	log.Info("GetAccountByUUID: Process Started")
 	defer log.Info("GetAccountByUUID: Process Finished")
 
