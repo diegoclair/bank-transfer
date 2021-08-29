@@ -58,5 +58,13 @@ var (
 				ENGINE = InnoDB CHARACTER SET=utf8;
 			`,
 		},
+		{
+			Version:     3,
+			Description: "Add uuid field into tab_transfer",
+			Script: `
+				ALTER TABLE tab_transfer
+					ADD COLUMN transfer_uuid CHAR(36) NOT NULL after transfer_id;
+			`,
+		},
 	}
 )

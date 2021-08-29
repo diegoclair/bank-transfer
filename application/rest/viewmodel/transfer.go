@@ -7,7 +7,7 @@ import (
 )
 
 type Transfer struct {
-	ID                     int64     `json:"id,omitempty"`
+	TransferUUID           string    `json:"id"`
 	AccountOriginUUID      string    `json:"account_origin_id,omitempty"`
 	AccountDestinationUUID string    `json:"account_destination_id,omitempty" validate:"required"`
 	Amount                 float64   `json:"amount,omitempty" validate:"required"`

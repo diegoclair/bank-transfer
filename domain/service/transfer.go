@@ -7,6 +7,7 @@ import (
 	"github.com/diegoclair/bank-transfer/infra/auth"
 	"github.com/diegoclair/go_utils-lib/v2/resterrors"
 	"github.com/labstack/gommon/log"
+	"github.com/twinj/uuid"
 )
 
 type transferService struct {
@@ -43,6 +44,7 @@ func (s *transferService) CreateTransfer(appContext context.Context, transfer en
 
 	transfer.AccountDestinationID = destAccount.ID
 	transfer.AccountOriginID = account.ID
+	transfer.TransferUUID = uuid.NewV4().String()
 
 	tx, err := s.svc.dm.MySQL().Begin()
 	if err != nil {
@@ -93,11 +95,19 @@ func (s *transferService) GetTransfers(appContext context.Context) (transfers []
 		return transfers, err
 	}
 
-	transfers, err = s.svc.dm.MySQL().Account().GetTransfersByAccountID(account.ID)
+	trasnfersMade, err := s.svc.dm.MySQL().Account().GetTransfersByAccountID(account.ID, true)
 	if err != nil {
 		log.Error("GetTransfers: ", err)
 		return transfers, err
 	}
+	transfers = append(transfers, trasnfersMade...)
+
+	trasnfersReceived, err := s.svc.dm.MySQL().Account().GetTransfersByAccountID(account.ID, false)
+	if err != nil {
+		log.Error("GetTransfers: ", err)
+		return transfers, err
+	}
+	transfers = append(transfers, trasnfersReceived...)
 
 	return transfers, nil
 }

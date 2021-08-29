@@ -47,11 +47,12 @@ func (r *accountRepo) parseAccount(row scanner) (account entity.Account, err err
 func (r *accountRepo) AddTransfer(transfer entity.Transfer) (err error) {
 	query := `
 		INSERT INTO tab_transfer (
+			transfer_uuid,
 			account_origin_id,
 			account_destination_id,
 			amount
 		) 
-		VALUES (?, ?, ?);
+		VALUES (?, ?, ?, ?);
 	`
 
 	stmt, err := r.db.Prepare(query)
@@ -61,6 +62,7 @@ func (r *accountRepo) AddTransfer(transfer entity.Transfer) (err error) {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(
+		transfer.TransferUUID,
 		transfer.AccountOriginID,
 		transfer.AccountDestinationID,
 		transfer.Amount,
@@ -176,19 +178,36 @@ func (r *accountRepo) GetAccountByUUID(accountUUID string) (account entity.Accou
 	return account, nil
 }
 
-func (r *accountRepo) GetTransfersByAccountID(accountID int64) (transfers []entity.Transfer, err error) {
+func (r *accountRepo) GetTransfersByAccountID(accountID int64, origin bool) (transfers []entity.Transfer, err error) {
 	query := ` 
 		SELECT 
 			tt.transfer_id,
+			tt.transfer_uuid,
 			tt.account_origin_id,
+			origin.account_uuid,
 			tt.account_destination_id,
+			dest.account_uuid,
 			tt.amount,
 			tt.created_at
 		
 		FROM 	tab_transfer 			tt
-		WHERE	tt.account_origin_id 	= 	?
-	`
 
+		INNER JOIN tab_account origin
+			ON origin.account_id = tt.account_origin_id
+		
+		INNER JOIN tab_account dest
+			ON dest.account_id = tt.account_destination_id
+
+	`
+	if origin {
+		query += `WHERE	tt.account_origin_id 		= 	? `
+	} else {
+		query += `WHERE	tt.account_destination_id 	= 	? `
+	}
+
+	query += `
+		ORDER BY tt.created_at desc
+	`
 	stmt, err := r.db.Prepare(query)
 	if err != nil {
 		return transfers, mysqlutils.HandleMySQLError(err)
@@ -204,8 +223,11 @@ func (r *accountRepo) GetTransfersByAccountID(accountID int64) (transfers []enti
 	for rows.Next() {
 		err = rows.Scan(
 			&transfer.ID,
+			&transfer.TransferUUID,
 			&transfer.AccountOriginID,
+			&transfer.AccountOriginUUID,
 			&transfer.AccountDestinationID,
+			&transfer.AccountDestinationUUID,
 			&transfer.Amount,
 			&transfer.CreateAt,
 		)
